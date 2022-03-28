@@ -1,0 +1,50 @@
+{% extends "store/base.html" %}
+{% block body_block %}
+{% if user.is_authenticated %}
+{% if user.vendordetail.is_vendor %}
+<div class="text-lg-start row align-items-center mt-2 justify-content-center">
+  <h2 class="large fw-bold mb-0 row justify-content-center align-items-center">Welcome, {{ user.first_name }}</h2>
+</div>
+<div class="row mt-5 mx-5">
+  <div class="col-md-4 row align-items-center mt-2 justify-content-center border">
+    <form enctype="multipart/form-data" method="POST" class="row align-items-center justify-content-center">
+    {% csrf_token %}
+    {{ item_form.as_p }}
+    <div class="row align-items-center justify-content-center mb-6 w-50">
+      <button type="submit" name="additem" class="btn btn-primary btn-lg text-center"
+        >Add Item</button>
+        {% if itemcreated %}
+        <div class="text-lg-start row align-items-center mt-2 justify-content-center">
+          <h2 class="h6 fw-bold mb-0 row justify-content-center align-items-center">Item has been successfully created !</h2>
+        </div>
+        {% endif %}
+    </div>
+    </form>
+  </div>
+  <div class="col-md-4 row align-items-center mt-2 justify-content-center border">
+    <form enctype="multipart/form-data" method="POST" class="row align-items-center justify-content-center">
+      {% csrf_token %}
+      <select name="dropdown" id="dropdown" class="w-75">
+        {% for item in storefront %}
+        <option value="{{ item.itemname }}" class="row justify-content-center align-items-center">{{ item.itemname }}</option>
+        {% endfor %}
+      </select>
+      <div class="text-lg-start row align-items-center mt-2 justify-content-center">
+        <button type="submit" name="deleteitem"
+            class="btn btn-primary mt-2 btn-lg text-center w-75">Delete Item</button>
+            {% if itemdeleted %}
+            <div class="text-lg-start row align-items-center mt-2 justify-content-center">
+              <h2 class="h6 fw-bold mb-0 row justify-content-center align-items-center">Item has been successfully deleted !</h2>
+            </div>
+            {% endif %}
+      </div>
+    </form>
+  </div>
+  <div class="col-md-4 row align-items-center mt-2 justify-content-center border">.col-md-4</div>
+</div>
+{% else %}
+<h2>ACCESS DENIED !</h2>
+<h3>Please use a vendor account to login.</h3>
+{% endif %}
+{% endif %}
+{% endblock %}

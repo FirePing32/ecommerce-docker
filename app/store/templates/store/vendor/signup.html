@@ -1,0 +1,29 @@
+{% extends 'store/base.html' %}
+{% block body_block %}
+{% load socialaccount %}
+<section>
+  <div class="container-fluid h-custom">
+    <div class="row d-flex justify-content-center align-items-center h-100">
+      <div class="col-md-8 col-lg-6 col-xl-4 my-4 w-25">
+        {% if registered %}
+        <div class="divider d-flex align-items-center justify-content-center my-4">
+          <h1 class="text-center">Thank you for registering!</h1>
+        </div>
+        {% else %}
+        <h1 class="text-center">Register</h1><br>
+        <form enctype="multipart/form-data" method="POST">
+          {% csrf_token %}
+          {{ vendor_form.as_p }}
+          {{ vendor_detail_form.as_p }}
+          <br>
+          <div class="text-lg-start row align-items-center justify-content-center mb-6">
+            <button type="submit" class="btn btn-primary btn-lg text-center"
+              style="padding-left: 2.5rem; padding-right: 2.5rem;">Sign Up</button>
+          </div>
+          {% endif %}
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

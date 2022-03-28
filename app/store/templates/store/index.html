@@ -1,0 +1,44 @@
+{% extends "store/base.html" %}
+{% block body_block %}
+<style>
+.wrapper {
+display: grid;
+grid-template-columns: repeat(3, 1fr);
+gap: 10px;
+}
+
+.wrapper > div > div {
+  height: 300px;
+  cursor: pointer;
+}
+
+.wrapper > div > div > p {
+  margin-bottom: 0 !important;
+}
+
+.wrapper > div > a {
+  text-decoration: none;
+}
+
+</style>
+{% if user.is_authenticated %}
+  {% if user.vendordetail.is_vendor %}
+  <h2>ACCESS DENIED !</h2>
+  <h3>Please use a user account to login.</h3>
+  {% else %}
+  <h2 class="m-4 text">Welcome, {{ user.first_name }}</h2>
+  {% endif %}
+{% endif %}
+<div class="wrapper">
+  {% for item in store_items %}
+  <div class="row align-items-center justify-content-center m-2">
+    <div class="row justify-content-center align-items-center border w-50" onclick="location.href='/item/{{ item.itemno }}';">
+      <img src="https://via.placeholder.com/150" class="w-100" />
+      <p class="row fs-4 float-start">{{ item.itemname }}</p>
+      <p class="row fs-3 fw-bold float-start">₹ {{ item.itemprice }}</p>
+      <p class="row fs-6 float-start">{{ item.itemdesc }}</p>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

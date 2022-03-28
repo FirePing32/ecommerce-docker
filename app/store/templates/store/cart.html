@@ -1,0 +1,66 @@
+{% extends "store/base.html" %}
+{% block body_block %}
+{% if user.is_authenticated %}
+{% if user.vendordetail.is_vendor %}
+<h2>ACCESS DENIED !</h2>
+<h3>Please use a user account to login.</h3>
+{% else %}
+<div class="vw-100 vh-100">
+  <div class="row align-items-center justify-content-center border rounded">
+    <div class="row">
+      <div class="col-md-3 text-center">
+        <p>Item Name</p>
+      </div>
+      <div class="col-md-3 text-center">
+        <p>Item Description</p>
+      </div>
+      <div class="col-md-3 text-center">
+        <p>Item Price</p>
+      </div>
+      <div class="col-md-3 text-center">
+        <p>Item Quantity</p>
+      </div>
+    </div>
+    {% for item in cartItems %}
+    <div class="row">
+      <div class="col-md-3 text-center">
+        {{ item.item.itemname }}
+      </div>
+      <div class="col-md-3 text-center">
+        {{ item.item.itemdesc }}
+      </div>
+      <div class="col-md-3 text-center">
+        {{ item.item.itemprice }}
+      </div>
+      <div class="col-md-3 text-center">
+        {{ item.quantity }}
+      </div>
+    </div>
+    {% endfor %}
+    {% if checkout %}
+    <div class="justify-content-center align-items-center row mb-6">
+      <p class="text-center m-4 fs-1 text-success">Checkout Successful !</p>
+    </div>
+    {% endif %}
+    <p class="text-center mt-4 fs-2 text-success">Total: ₹ {{ total }}</p>
+    {% if total != 0 %}
+    {% if balance >= total %}
+    <form method="POST" class="row align-items-center justify-content-center vw-100">
+      {% csrf_token %}
+      <div class="justify-content-center align-items-center row mb-6">
+        <p class="text-center mt-4 fs-2 text-success">Balance: ₹ {{ balance }}</p>
+        <button type="submit" class="btn btn-primary btn-lg w-25">Checkout</button><br>
+      </div>
+    </form>
+    {% else %}
+      <div class="justify-content-center align-items-center row mb-6">
+        <p class="text-danger text-center fs-2">Balance insufficient !</p>
+        <p class="text-danger text-center fs-2">Current balance: ₹ {{ balance }}</p>
+      </div>
+    {% endif %}
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+{% endif %}
+{% endblock %}

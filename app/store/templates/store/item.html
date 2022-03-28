@@ -1,0 +1,34 @@
+{% extends "store/base.html" %}
+{% block body_block %}
+{% if user.is_authenticated %}
+{% if user.vendordetail.is_vendor %}
+<h2>ACCESS DENIED !</h2>
+<h3>Please use a user account to login.</h3>
+{% else %}
+<div class="row mt-5">
+  <div class="col-md-6 row align-items-center mt-2 justify-content-center">
+    <img src="https://via.placeholder.com/150" class="w-50" />
+  </div>
+  <div class="col-md-6 mt-2 float-start">
+    {% for item in itemobj %}
+    <p class="mt-5 h-auto fs-3">{{ item.itemname }}</p>
+    <div class="mb-4">
+      <p class="d-inline fs-5">Price: </p>
+      <p class="d-inline fs-1 text-success">₹ {{ item.itemprice }}</p>
+    </div>
+    <p class="h-auto fs-6">Sold by <a href="{% url 'vendorProfile' item.vendorName.vendor.username %}">{{ item.vendorName }}</a></p>
+    <form method="POST">
+      {% csrf_token %}
+      <div class="text-lg-start mb-6">
+        <button type="submit" class="btn btn-primary btn-lg w-25">Add to cart</button><br>
+        {% if added_to_cart %}
+        <p class="d-inline fs-4 text-success">Successfully added to cart !</p>
+        {% endif %}
+      </div>
+    </form>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+{% endif %}
+{% endblock %}

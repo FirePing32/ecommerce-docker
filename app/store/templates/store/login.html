@@ -1,0 +1,51 @@
+{% extends 'store/base.html' %}
+{% block body_block %}
+{% load socialaccount %}
+<title>Login</title>
+<meta name="description" content="Login">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<section>
+  <div class="container-fluid h-custom d-flex justify-content-center align-items-center vh-100">
+    <div class="d-flex justify-content-center align-items-center">
+      <div class="col-md-8 col-lg-6 col-xl-4 w-100">
+        <form method="POST" action="{% url 'login' %}">
+          <div class="text-center">
+            <p class="lead fw-normal mb-0">Sign in with <a href="{% provider_login_url 'google' %}" style="text-decoration: none; background: transparent;"><button type="button" class="btn btn-primary btn-floating mx-1">
+              <i class="fab fa-google"></i>
+            </button></a></p>
+          </div>
+
+          <div class="divider my-4">
+            <p class="text-center fw-bold mx-3 mb-0">Or</p>
+          </div>
+          <h1 class="text-center">Login</h1>
+          {% csrf_token %}
+
+          <div class="form-outline mb-4">
+            <input type="text" name="username" id="form3Example3" class="form-control form-control-lg"
+              placeholder="Enter username" />
+            <label class="form-label" for="form3Example3">Username</label>
+          </div>
+
+          <div class="form-outline mb-3">
+            <input type="password" name="password" id="form3Example4" class="form-control form-control-lg" placeholder="Enter password" />
+            <label class="form-label" for="form3Example4">Password</label>
+          </div>
+
+            <div class="text-lg-start row align-items-center justify-content-center mb-6">
+              <button type="submit" class="btn btn-primary btn-lg text-center"
+                style="padding-left: 2.5rem; padding-right: 2.5rem;">Log In</button>
+            </div>
+          <div class="text-lg-start mt-4 pt-2 row align-items-center justify-content-center">
+            <p class="small fw-bold mt-2 pt-1 mb-0 row justify-content-center align-items-center">Don't have an account? <a href="{% url 'signup' %}" class="link-danger row justify-content-center align-items-center">Register</a></p>
+          </div>
+          <div class="text-lg-start row align-items-center justify-content-center">
+            <p class="small fw-bold mb-0 row justify-content-center align-items-center">Vendor? <a
+                href="{% url 'vendorlogin' %}" class="link-danger row justify-content-center align-items-center">Login here</a></p>
+          </div>
+        </form>
+      </div>
+      </div>
+      </div>
+      </section>
+{% endblock %}

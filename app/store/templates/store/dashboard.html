@@ -1,0 +1,24 @@
+{% extends "store/base.html" %}
+{% block body_block %}
+{% if user.is_authenticated %}
+{% if user.vendordetail.is_vendor %}
+<h2>ACCESS DENIED !</h2>
+<h3>Please use a user account to login.</h3>
+{% else %}
+<div class="row justify-content-center align-content-center vw-100">
+  <p class="text-center fs-2">Update Balance</p>
+    <form method="POST" class="row align-items-center justify-content-center vw-100">
+      {% csrf_token %}
+      <div class="justify-content-center align-items-center row mb-6">
+        <p class="text-center mt-4 fs-2 text-primary">Current Balance: ₹ {{ balance }}</p>
+        {% if balance_updated %}
+        <p class="text-center fs-2 text-success">Balance Updated !</p>
+        {% endif %}
+        <input name="amount" type="number" min=1 class="w-25"><br>
+        <button type="submit" class="btn btn-primary btn-lg w-25">Add Money</button><br>
+      </div>
+    </form>
+</div>
+{% endif %}
+{% endif %}
+{% endblock %}

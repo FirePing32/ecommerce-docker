@@ -1,0 +1,10 @@
+{% extends "store/base.html" %}
+{% block body_block %}
+<div class="row align-content-center justify-content-center text-center vh-80">
+  {% for vendor in vendorObj %}
+  <img src="https://via.placeholder.com/150" class="rounded-circle m-4 w-25" />
+  <p class="fs-2">{{ vendor.first_name }} {{ vendor.last_name }}</p>
+  <p class="fs-5">{{ vendor.vendordetail.vendordesc }}</p>
+  {% endfor %}
+</div>
+{% endblock %}
