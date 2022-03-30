@@ -41,6 +41,12 @@ class Item(models.Model):
             MinValueValidator(1)
         ]
      )
+    orders = models.IntegerField(
+        default=0,
+        validators=[
+            MinValueValidator(0)
+        ]
+     )
 
 class Cart(models.Model):
 
@@ -58,3 +64,14 @@ class Reviews(models.Model):
     user = models.ForeignKey(User,on_delete=models.CASCADE)
     item = models.OneToOneField(Item, on_delete=models.CASCADE)
     review = models.CharField(max_length=200, blank=False)
+
+class UserOrders(models.Model):
+
+    user = models.ForeignKey(User,on_delete=models.CASCADE)
+    item = models.OneToOneField(Item,on_delete=models.CASCADE)
+    quantity = models.IntegerField(
+        default=1,
+        validators=[
+            MinValueValidator(1)
+        ]
+     )

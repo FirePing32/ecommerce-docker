@@ -6,7 +6,7 @@
   <h2 class="large fw-bold mb-0 row justify-content-center align-items-center">Welcome, {{ user.first_name }}</h2>
 </div>
 <div class="row mt-5 mx-5">
-  <div class="col-md-4 row align-items-center mt-2 justify-content-center border">
+  <div class="col-md-6 row align-items-center mt-2 justify-content-center border">
     <form enctype="multipart/form-data" method="POST" class="row align-items-center justify-content-center">
     {% csrf_token %}
     {{ item_form.as_p }}
@@ -21,7 +21,7 @@
     </div>
     </form>
   </div>
-  <div class="col-md-4 row align-items-center mt-2 justify-content-center border">
+  <div class="col-md-6 row align-items-center mt-2 justify-content-center border">
     <form enctype="multipart/form-data" method="POST" class="row align-items-center justify-content-center">
       {% csrf_token %}
       <select name="dropdown" id="dropdown" class="w-75">
@@ -40,7 +40,40 @@
       </div>
     </form>
   </div>
-  <div class="col-md-4 row align-items-center mt-2 justify-content-center border">.col-md-4</div>
+    <p class="text-center fs-3">Orders</p>
+      <div class="row align-items-center justify-content-center border rounded">
+        <div class="row">
+          <div class="col-md-3 text-center">
+            <p>Item Name</p>
+          </div>
+          <div class="col-md-3 text-center">
+            <p>Item Description</p>
+          </div>
+          <div class="col-md-3 text-center">
+            <p>Item Price</p>
+          </div>
+          <div class="col-md-3 text-center">
+            <p>Item Quantity</p>
+          </div>
+        </div>
+        <div class="row">
+          {% for item in itemsList %}
+          <div class="col-md-3 text-center">
+            {{ item.itemname }}
+          </div>
+          <div class="col-md-3 text-center">
+            {{ item.itemdesc }}
+          </div>
+          <div class="col-md-3 text-center">
+            {{ item.itemprice }}
+          </div>
+          <div class="col-md-3 text-center">
+            {{ item.orders }}
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+  </div>
 </div>
 {% else %}
 <h2>ACCESS DENIED !</h2>

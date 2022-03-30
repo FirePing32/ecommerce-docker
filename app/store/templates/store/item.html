@@ -20,13 +20,29 @@
     <form method="POST">
       {% csrf_token %}
       <div class="text-lg-start mb-6">
-        <button type="submit" class="btn btn-primary btn-lg w-25">Add to cart</button><br>
+        <button type="submit" name="addToCart" class="btn btn-primary btn-lg w-25">Add to cart</button><br>
         {% if added_to_cart %}
         <p class="d-inline fs-4 text-success">Successfully added to cart !</p>
         {% endif %}
       </div>
     </form>
     {% endfor %}
+    <div class="row justify-content-center align-items-center">
+      <p class="text-center fs-3">Reviews</p>
+      {% for review in reviews %}
+      <p class="text-center fs-5 border w-100">{{ review.review }}</p>
+      {% endfor %}
+      <form method="POST">
+      {% csrf_token %}
+      <textarea placeholder="Your review" name="review" class="w-100"></textarea>
+      <div class="text-lg-start mb-6">
+        <button type="submit" class="btn mt-4 btn-primary btn-lg w-25">Submit</button><br>
+        {% if reviewStatus %}
+        <p class="d-inline fs-4 text-success">Review submitted !</p>
+        {% endif %}
+      </div>
+      </form>
+    </div>
   </div>
 </div>
 {% endif %}

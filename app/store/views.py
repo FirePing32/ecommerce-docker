@@ -4,7 +4,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from store.forms import UserForm, UserDetailForm, VendorForm, VendorDetailForm, ItemForm
 from django.urls import reverse
-from .models import Item, Cart, UserDetail
+from .models import Item, Cart, UserDetail, Reviews, UserOrders
 from django.contrib.auth.models import User
 
 def index(request):
@@ -123,37 +123,54 @@ def vendorDashboard(request):
 
     itemform = ItemForm()
     storefront = Item.objects.all()
+
+    vendorObj = User.objects.filter(username=request.user)
+    items = Item.objects.filter(vendorName=vendorObj[0].vendordetail)
+
     return render(request, 'store/vendor/dashboard.html',
                             {'item_form':itemform,
                             'itemcreated':itemcreated,
                             'itemdeleted':itemdeleted,
-                            'storefront':storefront})
+                            'storefront':storefront,
+                            'itemsList':items})
 
 @login_required
 def itemView(request, uuid):
     added_to_cart = False
+    review_submitted = False
     if request.method == 'POST':
-        itemObj = Item.objects.filter(itemno=uuid)
-        userObj = request.user
-        itemInCart = Cart.objects.filter(user=request.user, item=itemObj[0])
-        if itemInCart:
-            for item in itemInCart:
-                item.quantity = item.quantity + 1
-                item.save()
+        if 'addToCart' in request.POST:
+            itemObj = Item.objects.filter(itemno=uuid)
+            userObj = request.user
+            itemInCart = Cart.objects.filter(user=request.user, item=itemObj[0])
+            if itemInCart:
+                for item in itemInCart:
+                    item.quantity += 1
+                    item.save()
+                    added_to_cart = True
+            else:
+                Cart.objects.create(user=userObj, item=itemObj[0], quantity=1)
                 added_to_cart = True
-        else:
-            Cart.objects.create(user=userObj, item=itemObj[0], quantity=1)
-            added_to_cart = True
+        elif 'review' in request.POST:
+            review = request.POST.get('review')
+            item_obj = Item.objects.get(itemno=uuid)
+            Reviews.objects.create(user=request.user, item=item_obj, review=review)
+            review_submitted = True
 
     itemobj = Item.objects.filter(itemno=uuid)
+    reviews = Reviews.objects.filter(item=itemobj[0])
     return render(request, 'store/item.html',
                             {'itemobj':itemobj,
-                            'added_to_cart':added_to_cart})
+                            'added_to_cart':added_to_cart,
+                            'reviewStatus':review_submitted,
+                            'reviews':reviews})
 
 def vendorProfile(request, vendor):
     vendorObj = User.objects.filter(username=vendor)
+    items = Item.objects.filter(vendorName=vendorObj[0].vendordetail)
     return render(request, 'store/vendor/profile.html',
-                            {'vendorObj':vendorObj})
+                            {'vendorObj':vendorObj,
+                            'vendorItems':items})
 
 @login_required
 def cart(request):
@@ -169,6 +186,22 @@ def cart(request):
         userObj = UserDetail.objects.get(user=request.user)
         userObj.balance -= total
         userObj.save()
+
+        cartitems = Cart.objects.filter(user=request.user)
+        for item in cartitems:
+            orders = UserOrders.objects.filter(user=request.user, item=item.item)
+            itemOrder = Item.objects.get(itemno=item.item.itemno)
+            itemOrder.orders += 1
+            itemOrder.save()
+            
+            if orders:
+                for order in orders:
+                    order.quantity += 1
+                    order.save()
+
+            else:
+                UserOrders.objects.create(user=request.user, item=item.item, quantity=1)
+
         Cart.objects.all().delete()
         checkout = True
 
@@ -181,14 +214,25 @@ def cart(request):
 @login_required
 def userDashboard(request):
     balance_updated = False
+    address_updated = False
     if request.method == 'POST':
-        amount = request.POST.get('amount')
-        userObj = UserDetail.objects.get(user=request.user)
-        userObj.balance += int(amount)
-        userObj.save()
-        balance_updated = True
+        if 'amount' in request.POST:
+            amount = request.POST.get('amount')
+            userObj = UserDetail.objects.get(user=request.user)
+            userObj.balance += int(amount)
+            userObj.save()
+            balance_updated = True
+        elif 'address' in request.POST:
+            address = request.POST.get('address')
+            userDetailObj = UserDetail.objects.get(user=request.user)
+            userDetailObj.address = address
+            userDetailObj.save()
+            address_updated = True
 
     balance = request.user.userdetail.balance
+    address = request.user.userdetail.address
     return render(request, 'store/dashboard.html',
                             {'balance':balance,
-                            'balance_updated':balance_updated})
+                            'address':address,
+                            'balance_updated':balance_updated,
+                            'addressUpdated':address_updated})

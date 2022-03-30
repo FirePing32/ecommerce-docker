@@ -10,12 +10,23 @@
     <form method="POST" class="row align-items-center justify-content-center vw-100">
       {% csrf_token %}
       <div class="justify-content-center align-items-center row mb-6">
-        <p class="text-center mt-4 fs-2 text-primary">Current Balance: ₹ {{ balance }}</p>
+        <p class="text-center mt-4 fs-3 text-primary">Current Balance: ₹ {{ balance }}</p>
         {% if balance_updated %}
         <p class="text-center fs-2 text-success">Balance Updated !</p>
         {% endif %}
         <input name="amount" type="number" min=1 class="w-25"><br>
         <button type="submit" class="btn btn-primary btn-lg w-25">Add Money</button><br>
+      </div>
+    </form>
+    <p class="text-center fs-2">Change Address</p>
+    <form method="POST" class="row align-items-center justify-content-center vw-100">
+      {% csrf_token %}
+      <div class="justify-content-center align-items-center row mb-6">
+        <textarea name="address" class="w-25">{{ address }}</textarea><br>
+        {% if addressUpdated %}
+        <p class="text-center fs-2 text-success">Address Updated !</p>
+        {% endif %}
+        <button type="submit" class="btn btn-primary btn-lg w-25">Update Address</button><br>
       </div>
     </form>
 </div>
