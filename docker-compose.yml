@@ -5,9 +5,9 @@ services:
     build: 
       context: ./
       dockerfile: Dockerfile
-    command: sh -c "cd app/ && gunicorn ecommerce.wsgi:application --bind 0.0.0.0:8000"
+    command: cd app/ && gunicorn ecommerce.wsgi:application --bind 0.0.0.0:8000
     volumes:
-      - ./app/:/usr/src/ecommerce/app
+      - ./app/:/home/azure/ecommerce/app
     expose:
       - 8000
     env_file:
@@ -29,11 +29,8 @@ services:
     restart: always
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
-      - /etc/letsencrypt/live/${domain}/privkey.pem:/etc/letsencrypt/live/${domain}/privkey.pem
-      - /etc/letsencrypt/live/${domain}/fullchain.pem:/etc/letsencrypt/live/${domain}/fullchain.pem
-      - /etc/letsencrypt/options-ssl-nginx.conf:/etc/letsencrypt/options-ssl-nginx.conf
-      - /etc/letsencrypt/ssl-dhparams.pem:/etc/letsencrypt/ssl-dhparams.pem
-  
+    depends_on:
+      - web  
 
 volumes:
   postgres_data:

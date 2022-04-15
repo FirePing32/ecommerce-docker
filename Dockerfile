@@ -1,6 +1,6 @@
 FROM python:3.9.6-alpine
 
-WORKDIR /usr/src/ecommerce
+WORKDIR /home/azure/ecommerce
 
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
@@ -13,12 +13,10 @@ RUN pip install --upgrade pip
 COPY ./requirements.txt .
 RUN pip install -r requirements.txt
 
-COPY . .
-
 COPY ./entrypoint.sh .
-RUN sed -i 's/\r$//g' /usr/src/ecommerce/app/entrypoint.sh
-RUN chmod +x /usr/src/ecommerce/app/entrypoint.sh
+RUN sed -i 's/\r$//g' ./entrypoint.sh
+RUN chmod +x ./entrypoint.sh
 
 COPY . .
 
-ENTRYPOINT ["/usr/src/ecommerce/app/entrypoint.sh"]
+ENTRYPOINT ["./entrypoint.sh"]
