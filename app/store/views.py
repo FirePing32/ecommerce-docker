@@ -13,6 +13,13 @@ def index(request):
     except:
         account_status = False
 
+    if request.user.is_authenticated:
+        try:
+            if User.objects.filter(username=request.user.username)[0].userdetail:
+                pass
+        except:
+            UserDetail.objects.create(user=request.user, address="", balance=0)
+
     if request.user.is_authenticated and account_status:
         return redirect('vendorDashboard')
     else:
@@ -176,7 +183,7 @@ def vendorProfile(request, vendor):
 def cart(request):
 
     checkout = False
-    cartItems = Cart.objects.all()
+    cartItems = Cart.objects.filter(user=request.user)
     total = 0
     for item in cartItems:
         total += (item.item.itemprice * item.quantity)
