@@ -200,7 +200,7 @@ def cart(request):
             itemOrder = Item.objects.get(itemno=item.item.itemno)
             itemOrder.orders += 1
             itemOrder.save()
-            
+
             if orders:
                 for order in orders:
                     order.quantity += 1
@@ -209,7 +209,7 @@ def cart(request):
             else:
                 UserOrders.objects.create(user=request.user, item=item.item, quantity=1)
 
-        Cart.objects.all().delete()
+        Cart.objects.filter(user=request.user).delete()
         checkout = True
 
     return render(request, 'store/cart.html',
