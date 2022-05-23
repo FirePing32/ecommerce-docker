@@ -25,6 +25,15 @@
         <p class="d-inline fs-4 text-success">Successfully added to cart !</p>
         {% endif %}
       </div>
+      <div class="text-lg-start mb-6">
+        <button type="submit" name="addToWishlist" class="btn btn-primary btn-lg w-25">Add to wishlist</button><br>
+        {% if added_to_wishlist %}
+        <p class="d-inline fs-4 text-success">Successfully added to wishlist !</p>
+        {% endif %}
+        {% if already_in_wishlist %}
+        <p class="d-inline fs-4 text-danger">Item is already in wishlist !</p>
+        {% endif %}
+      </div>
     </form>
     {% endfor %}
     <div class="row justify-content-center align-items-center">

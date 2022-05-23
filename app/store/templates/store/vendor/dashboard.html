@@ -25,7 +25,7 @@
     <form enctype="multipart/form-data" method="POST" class="row align-items-center justify-content-center">
       {% csrf_token %}
       <select name="dropdown" id="dropdown" class="w-75">
-        {% for item in storefront %}
+        {% for item in itemsList %}
         <option value="{{ item.itemname }}" class="row justify-content-center align-items-center">{{ item.itemname }}</option>
         {% endfor %}
       </select>
@@ -72,6 +72,9 @@
           </div>
           {% endfor %}
         </div>
+      </div>
+      <div class="row text-center">
+        <a href="{% url 'exportCSV' %}">Export CSV</a>
       </div>
   </div>
 </div>

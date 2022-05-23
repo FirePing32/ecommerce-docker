@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator
+from django.utils import timezone
 import uuid
 
 User._meta.get_field('email')._unique = True
@@ -51,7 +52,7 @@ class Item(models.Model):
 class Cart(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    item = models.OneToOneField(Item, on_delete=models.CASCADE)
+    item = models.ForeignKey(Item, on_delete=models.CASCADE)
     quantity = models.IntegerField(
         default=1,
         validators=[
@@ -68,10 +69,14 @@ class Reviews(models.Model):
 class UserOrders(models.Model):
 
     user = models.ForeignKey(User,on_delete=models.CASCADE)
+    item = models.ForeignKey(Item,on_delete=models.CASCADE)
+    orderdate = models.DateTimeField(default=timezone.now)
+
+    def publish(self):
+        self.orderdate = timezone.now()
+        self.save()
+
+class WishList(models.Model):
+
+    user = models.ForeignKey(User,on_delete=models.CASCADE)
     item = models.OneToOneField(Item,on_delete=models.CASCADE)
-    quantity = models.IntegerField(
-        default=1,
-        validators=[
-            MinValueValidator(1)
-        ]
-     )

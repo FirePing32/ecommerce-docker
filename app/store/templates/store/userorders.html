@@ -1,0 +1,30 @@
+{% extends "store/base.html" %}
+{% block body_block %}
+{% if user.is_authenticated %}
+{% if user.vendordetail.is_vendor %}
+<h2>ACCESS DENIED !</h2>
+<h3>Please use a user account to login.</h3>
+{% else %}
+<div class="vw-100 vh-100">
+  <div class="row align-items-center justify-content-center border rounded">
+    <div class="row">
+      <div class="col-md-6 text-center">
+        <p>Item Name</p>
+      </div>
+      <div class="col-md-6 text-center">
+        <p>Order Date</p>
+      </div>
+    </div>
+    {% for item in orders %}
+    <div class="row">
+      <div class="col-md-6 text-center">
+        {{ item.item.itemname }}
+      </div>
+      <div class="col-md-6 text-center">
+        {{ item.orderdate }}
+      </div>
+    </div>
+    {% endfor %}
+{% endif %}
+{% endif %}
+{% endblock %}

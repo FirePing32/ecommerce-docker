@@ -2,10 +2,12 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.core.mail import send_mail
 from store.forms import UserForm, UserDetailForm, VendorForm, VendorDetailForm, ItemForm
 from django.urls import reverse
-from .models import Item, Cart, UserDetail, Reviews, UserOrders
+from .models import Item, Cart, UserDetail, Reviews, UserOrders, VendorDetail, WishList
 from django.contrib.auth.models import User
+import csv
 
 def index(request):
     try:
@@ -70,22 +72,6 @@ def signup(request):
                            'user_detail_form':user_detail_form,
                            'registered':registered})
 
-def vendorlogin(request):
-    if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        vendor = authenticate(username=username, password=password)
-        if vendor:
-            if vendor.is_active:
-                login(request,vendor)
-                return HttpResponseRedirect(reverse('index'))
-            else:
-                return HttpResponse("Account not found !")
-        else:
-            return HttpResponse("Invalid login details given")
-    else:
-        return render(request, 'store/vendor/login.html')
-
 def vendorsignup(request):
     registered = False
     if request.method == 'POST':
@@ -131,8 +117,8 @@ def vendorDashboard(request):
     itemform = ItemForm()
     storefront = Item.objects.all()
 
-    vendorObj = User.objects.filter(username=request.user)
-    items = Item.objects.filter(vendorName=vendorObj[0].vendordetail)
+    vendorObj = User.objects.get(email=request.user.email)
+    items = Item.objects.filter(vendorName=vendorObj.vendordetail)
 
     return render(request, 'store/vendor/dashboard.html',
                             {'item_form':itemform,
@@ -142,22 +128,52 @@ def vendorDashboard(request):
                             'itemsList':items})
 
 @login_required
+def export_csv(request):
+    vendorObj = User.objects.filter(username=request.user)
+    items = Item.objects.filter(vendorName=vendorObj[0].vendordetail)
+    vendorItems = items.values_list('itemname', 'itemdesc', 'itemprice', 'orders')
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="orders.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(['Item Name', 'Item Description', 'Item Price', 'Orders'])
+
+    for item in vendorItems:
+        writer.writerow(item)
+
+    return response
+
+@login_required
 def itemView(request, uuid):
     added_to_cart = False
+    added_to_wishlist = False
+    already_in_wishlist = False
     review_submitted = False
     if request.method == 'POST':
         if 'addToCart' in request.POST:
             itemObj = Item.objects.filter(itemno=uuid)
             userObj = request.user
-            itemInCart = Cart.objects.filter(user=request.user, item=itemObj[0])
-            if itemInCart:
+            itemInCart = Cart.objects.filter(user_id=request.user.id, item_id=itemObj[0].id)
+            if itemInCart.exists():
                 for item in itemInCart:
                     item.quantity += 1
                     item.save()
                     added_to_cart = True
             else:
-                Cart.objects.create(user=userObj, item=itemObj[0], quantity=1)
+                Cart.objects.create(user_id=userObj.id, item_id=itemObj[0].id, quantity=1)
                 added_to_cart = True
+
+        elif 'addToWishlist' in request.POST:
+            item = Item.objects.get(itemno=uuid)
+            iteminlist = WishList.objects.filter(user_id=request.user.id, item_id=item.id).exists()
+
+            if iteminlist:
+                already_in_wishlist = True
+            else:
+                WishList.objects.create(user_id=request.user.id, item_id=item.id)
+                added_to_wishlist = True
+
         elif 'review' in request.POST:
             review = request.POST.get('review')
             item_obj = Item.objects.get(itemno=uuid)
@@ -169,6 +185,8 @@ def itemView(request, uuid):
     return render(request, 'store/item.html',
                             {'itemobj':itemobj,
                             'added_to_cart':added_to_cart,
+                            'added_to_wishlist':added_to_wishlist,
+                            'already_in_wishlist':already_in_wishlist,
                             'reviewStatus':review_submitted,
                             'reviews':reviews})
 
@@ -193,23 +211,18 @@ def cart(request):
         userObj = UserDetail.objects.get(user=request.user)
         userObj.balance -= total
         userObj.save()
+        vendorEmails = []
 
         cartitems = Cart.objects.filter(user=request.user)
         for item in cartitems:
-            orders = UserOrders.objects.filter(user=request.user, item=item.item)
+            vendorEmails.append(item.item.vendorName.vendor.email)
             itemOrder = Item.objects.get(itemno=item.item.itemno)
             itemOrder.orders += 1
             itemOrder.save()
-
-            if orders:
-                for order in orders:
-                    order.quantity += 1
-                    order.save()
-
-            else:
-                UserOrders.objects.create(user=request.user, item=item.item, quantity=1)
+            UserOrders.objects.create(user=request.user, item=item.item)
 
         Cart.objects.filter(user=request.user).delete()
+        send_mail('Items Sold', f'Items were sold recently', 'noreply@ecommerce-docker.tk', vendorEmails, fail_silently=False)
         checkout = True
 
     return render(request, 'store/cart.html',
@@ -243,3 +256,26 @@ def userDashboard(request):
                             'address':address,
                             'balance_updated':balance_updated,
                             'addressUpdated':address_updated})
+
+@login_required
+def wishlist(request):
+
+    item_deleted = False
+
+    if request.method == 'POST':
+        itemid = list(request.POST)[1]
+        item = Item.objects.get(itemno=itemid)
+        WishList.objects.filter(item=item).delete()
+        item_deleted = True
+
+    items = WishList.objects.filter(user=request.user)
+    return render(request, 'store/wishlist.html',
+                            {'items':items,
+                            'item_deleted':item_deleted})
+
+@login_required
+def userorders(request):
+
+    userOrders = UserOrders.objects.filter(user=request.user)
+    return render(request, 'store/userorders.html',
+                            {'orders':userOrders})
