@@ -1,3 +1,4 @@
+from email.policy import default
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator
@@ -48,6 +49,7 @@ class Item(models.Model):
             MinValueValidator(0)
         ]
      )
+    itemimg = models.ImageField(upload_to='item_images', default='item_images/default.png')
 
 class Cart(models.Model):
 

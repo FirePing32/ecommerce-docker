@@ -14,6 +14,9 @@
         {% if balance_updated %}
         <p class="text-center fs-2 text-success">Balance Updated !</p>
         {% endif %}
+        {% if invalidamnt %}
+        <p class="text-danger fs-2 text-danger text-center">Please enter amount !</p>
+        {% endif %}
         <input name="amount" type="number" min=1 class="w-25"><br>
         <button type="submit" class="btn btn-primary btn-lg w-25">Add Money</button><br>
       </div>
@@ -25,6 +28,9 @@
         <textarea name="address" class="w-25">{{ address }}</textarea><br>
         {% if addressUpdated %}
         <p class="text-center fs-2 text-success">Address Updated !</p>
+        {% endif %}
+        {% if invalidaddr %}
+        <p class="text-danger fs-2 text-danger text-center">Please enter address !</p>
         {% endif %}
         <button type="submit" class="btn btn-primary btn-lg w-25">Update Address</button><br>
       </div>

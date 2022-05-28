@@ -33,7 +33,7 @@ gap: 10px;
   {% for item in store_items %}
   <div class="row align-items-center justify-content-center m-2">
     <div class="row justify-content-center align-items-center border w-50" onclick="location.href='/item/{{ item.itemno }}';">
-      <img src="https://via.placeholder.com/150" class="w-100" />
+      <img src="{{ item.itemimg.url }}" class="w-100" />
       <p class="row fs-4 float-start">{{ item.itemname }}</p>
       <p class="row fs-3 fw-bold float-start">₹ {{ item.itemprice }}</p>
       <p class="row fs-6 float-start">{{ item.itemdesc }}</p>

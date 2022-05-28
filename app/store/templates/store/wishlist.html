@@ -36,12 +36,12 @@
     <button name={{item.item.itemno}}>Delete</button>
   </div>
 </div>
+{% endfor %}
 {% if item_deleted %}
 <div class="row justify-content-center align-items-center">
   <p class="text-success text-center fs-2">Item successfully deleted !</p>
 </div>
 {% endif %}
-{% endfor %}
 </form>
 {% endif %}
 {% endif %}

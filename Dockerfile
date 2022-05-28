@@ -1,6 +1,6 @@
 FROM python:latest
 
-WORKDIR /home/azure/ecommerce
+WORKDIR /home/openvpnas/ecommerce-docker
 
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
@@ -22,5 +22,7 @@ RUN sed -i 's/\r$//g' ./entrypoint.sh
 RUN chmod +x ./entrypoint.sh
 
 COPY . .
+
+RUN mkdir -p /home/openvpnas/ecommerce-docker/app/media
 
 ENTRYPOINT ["./entrypoint.sh"]

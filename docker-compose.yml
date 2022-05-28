@@ -6,7 +6,9 @@ services:
       context: ./
       dockerfile: Dockerfile
     volumes:
-      - ./app/:/home/azure/ecommerce/app
+      - ./app/:/home/openvpnas/ecommerce/app
+      - static_volume:/home/openvpnas/ecommerce-docker/app/static:Z
+      - media_volume:/home/openvpnas/ecommerce-docker/app/media:Z
     expose:
       - 8000
     env_file:
@@ -28,8 +30,16 @@ services:
     restart: always
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+      - static_volume:/home/openvpnas/ecommerce-docker/app/static:Z
+      - media_volume:/home/openvpnas/ecommerce-docker/app/media:Z
+      - /etc/letsencrypt/live/ecommerce-docker.tk-0001/privkey.pem:/etc/letsencrypt/live/ecommerce-docker.tk-0001/privkey.pem
+      - /etc/letsencrypt/live/ecommerce-docker.tk-0001/fullchain.pem:/etc/letsencrypt/live/ecommerce-docker.tk-0001/fullchain.pem
+      - /etc/letsencrypt/options-ssl-nginx.conf:/etc/letsencrypt/options-ssl-nginx.conf
+      - /etc/letsencrypt/ssl-dhparams.pem:/etc/letsencrypt/ssl-dhparams.pem
     depends_on:
       - web  
 
 volumes:
   postgres_data:
+  media_volume:
+  static_volume:

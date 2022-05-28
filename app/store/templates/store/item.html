@@ -7,7 +7,9 @@
 {% else %}
 <div class="row mt-5">
   <div class="col-md-6 row align-items-center mt-2 justify-content-center">
-    <img src="https://via.placeholder.com/150" class="w-50" />
+    {% for item in itemobj %}
+    <img src="{{ item.itemimg.url }}" class="w-50" />
+    {% endfor %}
   </div>
   <div class="col-md-6 mt-2 float-start">
     {% for item in itemobj %}

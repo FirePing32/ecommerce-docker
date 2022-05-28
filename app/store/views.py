@@ -101,10 +101,11 @@ def vendorDashboard(request):
     itemdeleted = False
     if request.method == 'POST':
         if 'additem' in request.POST:
-            itemform = ItemForm(request.POST)
+            itemform = ItemForm(request.POST, request.FILES)
             if itemform.is_valid():
                 item = itemform.save(commit=False)
                 item.vendorName = request.user.vendordetail
+                item.itemimg = request.FILES['itemimg']
                 item.save()
                 itemcreated = True
             else:
@@ -150,6 +151,7 @@ def itemView(request, uuid):
     added_to_wishlist = False
     already_in_wishlist = False
     review_submitted = False
+    exists = False
     if request.method == 'POST':
         if 'addToCart' in request.POST:
             itemObj = Item.objects.filter(itemno=uuid)
@@ -177,8 +179,12 @@ def itemView(request, uuid):
         elif 'review' in request.POST:
             review = request.POST.get('review')
             item_obj = Item.objects.get(itemno=uuid)
-            Reviews.objects.create(user=request.user, item=item_obj, review=review)
-            review_submitted = True
+            exists = Reviews.objects.filter(user_id=request.user.id, item_id=item_obj.id).exists()
+            if exists:
+                review_submitted = False
+            else:
+                Reviews.objects.create(user=request.user, item=item_obj, review=review)
+                review_submitted = True
 
     itemobj = Item.objects.filter(itemno=uuid)
     reviews = Reviews.objects.filter(item=itemobj[0])
@@ -188,7 +194,8 @@ def itemView(request, uuid):
                             'added_to_wishlist':added_to_wishlist,
                             'already_in_wishlist':already_in_wishlist,
                             'reviewStatus':review_submitted,
-                            'reviews':reviews})
+                            'reviews':reviews,
+                            'exists':exists})
 
 def vendorProfile(request, vendor):
     vendorObj = User.objects.filter(username=vendor)
@@ -222,7 +229,7 @@ def cart(request):
             UserOrders.objects.create(user=request.user, item=item.item)
 
         Cart.objects.filter(user=request.user).delete()
-        send_mail('Items Sold', f'Items were sold recently', 'noreply@ecommerce-docker.tk', vendorEmails, fail_silently=False)
+        send_mail('Items Sold', f'Items were sold recently', 'nagarpalikaishere@gmail.com', vendorEmails, fail_silently=False)
         checkout = True
 
     return render(request, 'store/cart.html',
@@ -235,19 +242,27 @@ def cart(request):
 def userDashboard(request):
     balance_updated = False
     address_updated = False
+    InvalidAddress = False
+    InvalidAmount = False
     if request.method == 'POST':
         if 'amount' in request.POST:
             amount = request.POST.get('amount')
-            userObj = UserDetail.objects.get(user=request.user)
-            userObj.balance += int(amount)
-            userObj.save()
-            balance_updated = True
+            if amount == '':
+                InvalidAmount = True
+            else:
+                userObj = UserDetail.objects.get(user=request.user)
+                userObj.balance += int(amount)
+                userObj.save()
+                balance_updated = True
         elif 'address' in request.POST:
             address = request.POST.get('address')
-            userDetailObj = UserDetail.objects.get(user=request.user)
-            userDetailObj.address = address
-            userDetailObj.save()
-            address_updated = True
+            if address == '':
+                InvalidAddress = True
+            else:
+                userDetailObj = UserDetail.objects.get(user=request.user)
+                userDetailObj.address = address
+                userDetailObj.save()
+                address_updated = True
 
     balance = request.user.userdetail.balance
     address = request.user.userdetail.address
@@ -255,7 +270,9 @@ def userDashboard(request):
                             {'balance':balance,
                             'address':address,
                             'balance_updated':balance_updated,
-                            'addressUpdated':address_updated})
+                            'addressUpdated':address_updated,
+                            'invalidaddr':InvalidAddress,
+                            'invalidamnt':InvalidAmount})
 
 @login_required
 def wishlist(request):
