@@ -51,6 +51,9 @@
         {% if reviewStatus %}
         <p class="d-inline fs-4 text-success">Review submitted !</p>
         {% endif %}
+        {% if exists %}
+        <p class="d-inline fs-4 text-danger">You have already reviewed this product !</p>
+        {% endif %}
       </div>
       </form>
     </div>

@@ -65,7 +65,7 @@ class Cart(models.Model):
 class Reviews(models.Model):
 
     user = models.ForeignKey(User,on_delete=models.CASCADE)
-    item = models.OneToOneField(Item, on_delete=models.CASCADE)
+    item = models.ForeignKey(Item, on_delete=models.CASCADE)
     review = models.CharField(max_length=200, blank=False)
 
 class UserOrders(models.Model):
@@ -81,4 +81,4 @@ class UserOrders(models.Model):
 class WishList(models.Model):
 
     user = models.ForeignKey(User,on_delete=models.CASCADE)
-    item = models.OneToOneField(Item,on_delete=models.CASCADE)
+    item = models.ForeignKey(Item,on_delete=models.CASCADE)
