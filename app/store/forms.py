@@ -1,13 +1,14 @@
 from django import forms
 from store.models import UserDetail, VendorDetail, Item
 from django.contrib.auth.models import User
+from django.contrib.auth.password_validation import validate_password
 
 class UserForm(forms.ModelForm):
     first_name = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control'}))
     last_name = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control'}))
     email = forms.EmailField(widget=forms.TextInput(attrs={'class':'form-control'}))
     username = forms.CharField(widget=forms.PasswordInput(attrs={'class':'form-control', 'type':'username', 'id':'exampleInputEmail1'}))
-    password = forms.CharField(widget=forms.PasswordInput(attrs={'class':'form-control', 'type':'password', 'id':'exampleInputPassword1'}))
+    password = forms.CharField(widget=forms.PasswordInput(attrs={'class':'form-control', 'type':'password', 'id':'exampleInputPassword1'}), validators=[validate_password])
 
     class Meta():
         model = User
@@ -25,7 +26,7 @@ class VendorForm(forms.ModelForm):
     last_name = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control'}))
     email = forms.EmailField(widget=forms.TextInput(attrs={'class':'form-control'}))
     username = forms.CharField(widget=forms.PasswordInput(attrs={'class':'form-control', 'type':'username', 'id':'exampleInputEmail1'}))
-    password = forms.CharField(widget=forms.PasswordInput(attrs={'class':'form-control', 'type':'password', 'id':'exampleInputPassword1'}))
+    password = forms.CharField(widget=forms.PasswordInput(attrs={'class':'form-control', 'type':'password', 'id':'exampleInputPassword1'}), validators=[validate_password])
 
     class Meta():
         model = User
