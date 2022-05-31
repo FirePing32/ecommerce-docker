@@ -8,19 +8,25 @@ from django.urls import reverse
 from .models import Item, Cart, UserDetail, Reviews, UserOrders, VendorDetail, WishList
 from django.contrib.auth.models import User
 import csv
+import logging
+
+logger = logging.getLogger(__name__)
 
 def index(request):
     try:
         account_status = request.user.vendordetail.is_vendor
+        logger.info('CHECKING VENDOR STATUS')
     except:
         account_status = False
 
     if request.user.is_authenticated:
         try:
             if User.objects.filter(username=request.user.username)[0].userdetail:
+                logger.info(f'USER_DETAILS ALREADY EXIST: USERNAME={request.user.username}')
                 pass
         except:
             UserDetail.objects.create(user=request.user, address="", balance=0)
+            logger.info(f'USER_DETAILS MODEL CREATED FOR USERNAME: {request.user.username}')
 
     if request.user.is_authenticated and account_status:
         return redirect('vendorDashboard')
@@ -32,20 +38,25 @@ def user_login(request):
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
+        logger.info(f'USER LOGIN: USERNAME={username}')
         user = authenticate(username=username, password=password)
         if user:
             if user.is_active:
                 login(request,user)
+                logger.info(f'USER "{username}" SUCCESSFULLY LOGGED IN')
                 return HttpResponseRedirect(reverse('index'))
             else:
+                logger.error(f'INVALID CREDENTIALS FOR USERNAME: {username}')
                 return HttpResponse("Account not found !")
         else:
+            logger.error(f'INVALID CREDENTIALS FOR USERNAME: {username}')
             return HttpResponse("Invalid login details given")
     else:
         return render(request, 'store/login.html')
 
 @login_required
 def user_logout(request):
+    logger.info(f'USER LOGOUT SUCCESSFUL FOR USERNAME: {request.user.username}')
     logout(request)
     return HttpResponseRedirect(reverse('index'))
 
@@ -62,8 +73,9 @@ def signup(request):
             profile.user = user
             profile.save()
             registered = True
+            logger.info(f'NEW USER SIGNUP SUCCESSFUL: {user_form.cleaned_data} {user_detail_form.cleaned_data}')
         else:
-            print(user_form.errors, user_detail_form.errors)
+            logger.error(f'{user_form.errors} {user_detail_form.errors}')
     else:
         user_form = UserForm()
         user_detail_form = UserDetailForm()
@@ -85,8 +97,9 @@ def vendorsignup(request):
             profile.vendor = vendor
             profile.save()
             registered = True
+            logger.info(f'NEW VENDOR SIGNUP SUCCESSFUL: {vendor_form.cleaned_data} {vendor_detail_form.cleaned_data}')
         else:
-            print(vendor_form.errors, vendor_detail_form.errors)
+            logger.error('{vendor_form.errors} {vendor_detail_form.errors}')
     else:
         vendor_form = VendorForm()
         vendor_detail_form = VendorDetailForm()
@@ -108,10 +121,12 @@ def vendorDashboard(request):
                 item.itemimg = request.FILES['itemimg']
                 item.save()
                 itemcreated = True
+                logger.info(f'VENDOR ITEM CREATED: {itemform.cleaned_data}')
             else:
-                print(itemform.errors)
+                logger.error(itemform.errors)
         elif 'deleteitem' in request.POST:
             store_items = Item.objects.filter(itemname=request.POST.get('dropdown'))
+            logger.info(f'VENDOR ITEM DELETED: {store_items[0]}')
             store_items.delete()
             itemdeleted = True
 
@@ -143,6 +158,7 @@ def export_csv(request):
     for item in vendorItems:
         writer.writerow(item)
 
+    logger.info(f'VENDOR ITEM CSV FILE CREATED: {vendorItems}')
     return response
 
 @login_required
@@ -162,9 +178,11 @@ def itemView(request, uuid):
                     item.quantity += 1
                     item.save()
                     added_to_cart = True
+                    logger.info(f'ITEM QUANTITY UPDATED FOR: {itemInCart}')
             else:
                 Cart.objects.create(user_id=userObj.id, item_id=itemObj[0].id, quantity=1)
                 added_to_cart = True
+                logger.info(f'ITEM ADDED TO CART: {itemObj[0]}')
 
         elif 'addToWishlist' in request.POST:
             item = Item.objects.get(itemno=uuid)
@@ -172,9 +190,11 @@ def itemView(request, uuid):
 
             if iteminlist:
                 already_in_wishlist = True
+                logger.info(f'ITEM ALREADY IN WISHLIST: {item}')
             else:
                 WishList.objects.create(user_id=request.user.id, item_id=item.id)
                 added_to_wishlist = True
+                logger.info(f'ITEM ADDED TO WISHLIST: {item}')
 
         elif 'review' in request.POST:
             review = request.POST.get('review')
@@ -182,9 +202,11 @@ def itemView(request, uuid):
             exists = Reviews.objects.filter(user_id=request.user.id, item_id=item_obj.id).exists()
             if exists:
                 review_submitted = False
+                logger.info('REVIEW ALREADY EXISTS')
             else:
                 Reviews.objects.create(user=request.user, item=item_obj, review=review)
                 review_submitted = True
+                logger.info('REVIEW SUBMITTED')
 
     itemobj = Item.objects.filter(itemno=uuid)
     reviews = Reviews.objects.filter(item=itemobj[0])
@@ -218,6 +240,7 @@ def cart(request):
         userObj = UserDetail.objects.get(user=request.user)
         userObj.balance -= total
         userObj.save()
+        logger.info(f'CHECKOUT: AMOUNT DEDUCTED {total}')
         vendorEmails = []
 
         cartitems = Cart.objects.filter(user=request.user)
@@ -229,8 +252,11 @@ def cart(request):
             UserOrders.objects.create(user=request.user, item=item.item)
 
         Cart.objects.filter(user=request.user).delete()
+        logger.info(f'CHECKOUT: ITEMS DROPPED FROM CART FOR USER: {request.user.username}')
         send_mail('Items Sold', f'Items were sold recently', 'nagarpalikaishere@gmail.com', vendorEmails, fail_silently=False)
+        logger.info(f'CHECKOUT: MAILS SENT TO VENDORS: {vendorEmails}')
         checkout = True
+        logger.info('CHECKOUT: SUCCESSFUL')
 
     return render(request, 'store/cart.html',
                             {'cartItems':cartItems,
@@ -249,20 +275,24 @@ def userDashboard(request):
             amount = request.POST.get('amount')
             if amount == '':
                 InvalidAmount = True
+                logger.warning('NO AMOUNT SPECIFIED')
             else:
                 userObj = UserDetail.objects.get(user=request.user)
                 userObj.balance += int(amount)
                 userObj.save()
                 balance_updated = True
+                logger.info(f'BALANCE UPDATED: AMOUNT DEPOSITED {amount}')
         elif 'address' in request.POST:
             address = request.POST.get('address')
             if address == '':
                 InvalidAddress = True
+                logger.warning('NO ADDRESS SPECIFIED')
             else:
                 userDetailObj = UserDetail.objects.get(user=request.user)
                 userDetailObj.address = address
                 userDetailObj.save()
                 address_updated = True
+                logger.info('ADDRESS UPDATED')
 
     balance = request.user.userdetail.balance
     address = request.user.userdetail.address
@@ -284,6 +314,7 @@ def wishlist(request):
         item = Item.objects.get(itemno=itemid)
         WishList.objects.filter(item=item).delete()
         item_deleted = True
+        logger.info(f'ITEM WITH ITEMNO: {itemid} DELETED FROM WISHLIST')
 
     items = WishList.objects.filter(user=request.user)
     return render(request, 'store/wishlist.html',

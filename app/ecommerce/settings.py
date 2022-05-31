@@ -173,3 +173,37 @@ SOCIALACCOUNT_LOGIN_ON_GET=True
 SITE_ID = 1
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+
+    'formatters':{
+        'default':{
+            'format': '---{levelname}---: {message}',
+            'style': '{',
+        }
+    },
+
+    'handlers': {
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': './logs/logs.log',
+            'formatter': 'default'
+        },
+
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler'
+        },
+    },
+
+    'loggers': {
+        'store': {
+            'handlers': ['file', 'console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    }
+}
